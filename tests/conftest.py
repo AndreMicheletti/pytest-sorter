@@ -5,7 +5,6 @@ import json
 
 pytest_plugins = 'pytester'
 
-
 def pytest_addoption(parser):
     group = parser.getgroup("general")
     group._addoption('--sorted', action='store_true', dest='sorted',
