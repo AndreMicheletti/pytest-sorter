@@ -1,0 +1,10 @@
+site_name: pytest-sorter
+site_description: A simple plugin to first execute tests that historically failed more
+site_author: Andre Luiz Micheletti
+
+theme: readthedocs
+
+repo_url: https://github.com/AndreMicheletti/pytest-sorter
+
+pages:
+- Home: index.md
