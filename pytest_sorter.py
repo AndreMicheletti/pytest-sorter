@@ -1,12 +1,13 @@
 import pytest
-from pprint import pprint
 from collections import defaultdict
 import json
+
 
 def pytest_addoption(parser):
     group = parser.getgroup("general")
     group._addoption('--no-sorted', action='store_true', dest='no_sorted',
                      help="Run the tests in sorted order")
+
 
 def pytest_configure(config):
     config_line = (
@@ -59,13 +60,16 @@ class TestSorter(object):
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
-        """ Real meat for the plugin. Here the tests are sorted by their historic value """
+        """
+        Real meat for the plugin.
+        Here the tests are sorted by their historic value
+        """
         items_value = []
 
         for item in items:
             test_name = self.get_test_name(item)
 
-            ## GET EXECUTION AND FAIL COUNT FROM MARKS
+            # GET EXECUTION AND FAIL COUNT FROM MARKS
             mark = item.get_marker('historical')
             plus_exec = 0
             plus_fail = 0
@@ -73,13 +77,14 @@ class TestSorter(object):
                 plus_exec = abs(mark.kwargs.get('execs', 0))
                 plus_fail = abs(mark.kwargs.get('fails', 0))
 
-            ## CALCULATE TEST VALUE USING HISTORIC AND MARK VALUES
+            # CALCULATE TEST VALUE USING HISTORIC AND MARK VALUES
             items_value.append({
                 'item': item,
-                'value': self.get_test_order_value(test_name, plus_exec=plus_exec, plus_fail=plus_fail)
+                'value': self.get_test_order_value(test_name,
+                                plus_exec=plus_exec, plus_fail=plus_fail)
             })
 
-        ## SORT ITEMS BY THEIR VALUE
+        # SORT ITEMS BY THEIR VALUE
         sorted_items = [test_dict['item'] for test_dict in sorted(items_value, reverse=True, key=lambda x: x['value'])]
         items[:] = sorted_items
 

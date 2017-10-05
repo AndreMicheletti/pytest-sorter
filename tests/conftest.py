@@ -1,5 +1,4 @@
 import pytest
-from pprint import pprint
 from collections import defaultdict
 import json
 

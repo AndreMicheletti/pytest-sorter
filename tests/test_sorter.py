@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
-from pprint import pprint
 import pytest
 
 pytest_plugins = ['pytester']

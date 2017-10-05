@@ -20,7 +20,8 @@ setup(
     maintainer_email='andreluizmtmicheletti@gmail.com',
     license='MIT',
     url='https://github.com/AndreMicheletti/pytest-sorter',
-    description='A simple plugin to first execute tests that historically failed more',
+    description='A simple plugin to first' +
+    ' execute tests that historically failed more',
     long_description=read('README.rst'),
     py_modules=['pytest_sorter'],
     install_requires=['pytest>=3.1.1'],
