@@ -19,7 +19,8 @@ def pytest_configure(config):
         return
 
     test_sorter = TestSorter(config)
-    config.pluginmanager.register(test_sorter, "test_sorter")
+    if not config.pluginmanager.is_registered("pytest-sorter"):
+        config.pluginmanager.register(test_sorter, "pytest-sorter")
 
 
 class TestSorter(object):
@@ -31,6 +32,9 @@ class TestSorter(object):
         self.load_test_history()
 
     def get_test_name(self, item):
+        from pytest import Module
+        if isinstance(item, Module):
+            return item.nodeid
         return item.location[0] + "::" + item.location[2]
 
     @pytest.hookimpl(hookwrapper=True)

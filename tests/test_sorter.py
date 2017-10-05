@@ -15,7 +15,6 @@ def item_names_for(testdir):
 
         from conftest import TestSorter
         test_sorter = TestSorter(config)
-        config.pluginmanager.register(test_sorter, "test_sorter")
 
         hook = testdir.config.hook
         hook.pytest_collection_modifyitems(session=items[0].session,

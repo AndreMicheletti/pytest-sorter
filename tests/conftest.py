@@ -12,6 +12,9 @@ class TestSorter(object):
         self.load_test_history()
 
     def get_test_name(self, item):
+        from pytest import Module
+        if isinstance(item, Module):
+            return item.nodeid
         return item.location[0] + "::" + item.location[2]
 
     @pytest.hookimpl(hookwrapper=True)
