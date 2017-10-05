@@ -3,20 +3,6 @@ from pprint import pprint
 from collections import defaultdict
 import json
 
-pytest_plugins = 'pytester'
-
-def pytest_addoption(parser):
-    group = parser.getgroup("general")
-    group._addoption('--sorted', action='store_true', dest='sorted',
-                     help="Run the tests in sorted order")
-
-def pytest_configure(config):
-    if not config.option.sorted:
-        return
-    test_sorter = TestSorter(config)
-    config.pluginmanager.register(test_sorter, "test_sorter")
-
-
 class TestSorter(object):
 
     def __init__(self, config):
@@ -39,28 +25,39 @@ class TestSorter(object):
     def pytest_unconfigure(self, config):
         self.save_test_history()
 
-    def get_test_value(self, test_name):
+    def get_test_order_value(self, test_name, plus_exec=0, plus_fail=0):
         if test_name not in self.test_history.keys():
+            exec_count, fail_count = 0, 0
+        else:
+            exec_count, fail_count = self.test_history[test_name]
+        if ((exec_count + plus_exec) <= 0):
             return 0
-        info = self.test_history[test_name]
-        exec_count, fail_count = [int(value) for value in info.split(",")]
-        if (exec_count == 0):
-            return 0
-        return fail_count / exec_count
+        return (fail_count + plus_fail) / (exec_count + plus_exec)
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
+        """ Real meat for the plugin. Here the tests are sorted by their historic value """
         items_value = []
+
         for item in items:
             test_name = self.get_test_name(item)
-            print("FOUND ", test_name)
+
+            ## GET EXECUTION AND FAIL COUNT FROM MARKS
+            mark = item.get_marker('historical')
+            plus_exec = 0
+            plus_fail = 0
+            if mark:
+                plus_exec = abs(mark.kwargs.get('execs', 0))
+                plus_fail = abs(mark.kwargs.get('fails', 0))
+
+            ## CALCULATE TEST VALUE USING HISTORIC AND MARK VALUES
             items_value.append({
                 'item': item,
-                'value': self.get_test_value(test_name)
+                'value': self.get_test_order_value(test_name, plus_exec=plus_exec, plus_fail=plus_fail)
             })
+
+        ## SORT ITEMS BY THEIR VALUE
         sorted_items = [test_dict['item'] for test_dict in sorted(items_value, reverse=True, key=lambda x: x['value'])]
-        print("SORTED ")
-        pprint(sorted_items)
         items[:] = sorted_items
 
     def load_test_history(self):
@@ -82,12 +79,6 @@ class TestSorter(object):
             return
         failed = outcome == 'failed'
         if test_name not in self.test_history.keys():
-            self.test_history[test_name] = '0,0'
-        info = self.test_history[test_name]
-        if info != '':
-            exec_count, fail_count = [int(value) for value in info.split(",")]
-        else:
-            exec_count, fail_count = 0, 0
-        exec_count += 1
-        fail_count = (fail_count + 1) if failed else fail_count
-        self.test_history[test_name] = "{},{}".format(exec_count, fail_count)
+            self.test_history[test_name] = [0, 0]
+        self.test_history[test_name][0] += 1
+        self.test_history[test_name][1] = (self.test_history[test_name][1] + 1) if failed else self.test_history[test_name][1]
