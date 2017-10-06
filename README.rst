@@ -2,9 +2,13 @@
 pytest-sorter
 =============
 
+.. image:: http://img.shields.io/pypi/v/pytest-xdist.svg
+    :target: https://pypi.python.org/pypi/pytest-xdist
+
 .. image:: https://travis-ci.org/AndreMicheletti/pytest-sorter.svg?branch=master
     :target: https://travis-ci.org/AndreMicheletti/pytest-sorter
     :alt: See Build Status on Travis CI
+
 
 A simple plugin to first execute tests that historically failed more
 

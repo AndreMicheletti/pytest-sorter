@@ -36,7 +36,7 @@ class TestSorter(object):
             return 0
         return (fail_count + plus_fail) / (exec_count + plus_exec)
 
-    @pytest.hookimpl(trylast=True)
+    @pytest.hookimpl(hookwrapper=True, trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         """ Real meat for the plugin. Here the tests are sorted by their historic value """
         items_value = []

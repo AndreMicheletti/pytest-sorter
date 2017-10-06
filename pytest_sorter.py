@@ -20,8 +20,8 @@ def pytest_configure(config):
         return
 
     test_sorter = TestSorter(config)
-    if not config.pluginmanager.is_registered("pytest-sorter"):
-        config.pluginmanager.register(test_sorter, "pytest-sorter")
+    if not config.pluginmanager.is_registered("sorter"):
+        config.pluginmanager.register(test_sorter, "sorter")
 
 
 class TestSorter(object):
@@ -60,10 +60,7 @@ class TestSorter(object):
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
-        """
-        Real meat for the plugin.
-        Here the tests are sorted by their historic value
-        """
+        """ Real meat for the plugin. Here the tests are sorted by their historic value """
         items_value = []
 
         for item in items:
@@ -80,8 +77,7 @@ class TestSorter(object):
             # CALCULATE TEST VALUE USING HISTORIC AND MARK VALUES
             items_value.append({
                 'item': item,
-                'value': self.get_test_order_value(test_name,
-                                plus_exec=plus_exec, plus_fail=plus_fail)
+                'value': self.get_test_order_value(test_name, plus_exec=plus_exec, plus_fail=plus_fail)
             })
 
         # SORT ITEMS BY THEIR VALUE
