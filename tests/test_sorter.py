@@ -13,8 +13,8 @@ def item_names_for(testdir):
 
         from conftest import TestSorter
         test_sorter = TestSorter(config)
-        # if config.pluginmanager.is_registered("pytest-sorter"):
-        #     config.pluginmanager.register(test_sorter, "pytest-sorter")
+        if config.pluginmanager.is_registered("sorter"):
+            config.pluginmanager.register(test_sorter, "sorter")
         hook = testdir.config.hook
         hook.pytest_collection_modifyitems(session=items[0].session,
                                            config=config, items=items)

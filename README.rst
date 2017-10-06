@@ -2,8 +2,8 @@
 pytest-sorter
 =============
 
-.. image:: http://img.shields.io/pypi/v/pytest-xdist.svg
-    :target: https://pypi.python.org/pypi/pytest-xdist
+.. image:: http://img.shields.io/pypi/v/pytest-sorter.svg
+    :target: https://pypi.python.org/pypi/pytest-sorter
 
 .. image:: https://travis-ci.org/AndreMicheletti/pytest-sorter.svg?branch=master
     :target: https://travis-ci.org/AndreMicheletti/pytest-sorter

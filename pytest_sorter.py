@@ -20,8 +20,8 @@ def pytest_configure(config):
         return
 
     test_sorter = TestSorter(config)
-    if not config.pluginmanager.is_registered("sorter"):
-        config.pluginmanager.register(test_sorter, "sorter")
+    if not config.pluginmanager.is_registered("test-sorter"):
+        config.pluginmanager.register(test_sorter, "test-sorter")
 
 
 class TestSorter(object):
