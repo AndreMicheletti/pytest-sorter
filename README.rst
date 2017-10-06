@@ -9,7 +9,6 @@ pytest-sorter
 A simple plugin to first execute tests that historically failed more
 
 This `pytest`_ plugin was generated with `cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
-----
 
 
 Description
