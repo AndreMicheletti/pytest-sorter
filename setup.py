@@ -24,6 +24,7 @@ setup(
     ' execute tests that historically failed more',
     long_description=read('README.rst'),
     py_modules=['pytest_sorter'],
+    python_requires='>=3',
     install_requires=['pytest>=3.1.1'],
     classifiers=[
         'Development Status :: 4 - Beta',

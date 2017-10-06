@@ -6,28 +6,25 @@ pytest-sorter
     :target: https://travis-ci.org/AndreMicheletti/pytest-sorter
     :alt: See Build Status on Travis CI
 
-.. image:: https://ci.appveyor.com/api/projects/status/github/AndreMicheletti/pytest-sorter?branch=master
-    :target: https://ci.appveyor.com/project/AndreMicheletti/pytest-sorter/branch/master
-    :alt: See Build Status on AppVeyor
-
 A simple plugin to first execute tests that historically failed more
 
+This `pytest`_ plugin was generated with `cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
 ----
 
-This `Pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `Cookiecutter-pytest-plugin`_ template.
 
-
-Features
+Description
 --------
 
-* TODO
+This plugin will save a history of your tests executions in a file `.test_history`. For each test it will
+have how many times it was executed, and how many times it failed.
 
+Using that information it will calculate the percentage of failure of tests, and order them
+to first execute the higher *failure ratio*
 
 Requirements
 ------------
 
-* TODO
-
+* Python>=3
 
 Installation
 ------------
@@ -40,7 +37,13 @@ You can install "pytest-sorter" via `pip`_ from `PyPI`_::
 Usage
 -----
 
-* TODO
+After installed, your tests will automatically create and update the `.test_history` file,
+and order tests by their failure ratio.
+
+You can tell pytest to ignore this plugin by passing:
+```
+pytest --no-sorted
+```
 
 Contributing
 ------------
