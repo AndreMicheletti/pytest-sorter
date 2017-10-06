@@ -20,8 +20,7 @@ def pytest_configure(config):
         return
 
     test_sorter = TestSorter(config)
-    if not config.pluginmanager.is_registered("test-sorter"):
-        config.pluginmanager.register(test_sorter, "test-sorter")
+    config.pluginmanager.register(test_sorter, "using-sorter")
 
 
 class TestSorter(object):
@@ -29,7 +28,11 @@ class TestSorter(object):
     def __init__(self, config):
         self.config = config
         self.test_history = defaultdict(str)
-        self.file = config.args[0] + '/.test_history'
+        passed_arg = config.args[0]
+        if '.py' in passed_arg:
+            index = passed_arg.rfind('/')
+            passed_arg = passed_arg[:index]
+        self.file = "./" + passed_arg + '/.test_history'
         self.load_test_history()
 
     def get_test_name(self, item):
@@ -95,8 +98,9 @@ class TestSorter(object):
         try:
             with open(self.file, 'w') as f:
                 json.dump(self.test_history, f)
-        except:
+        except Exception as e:
             print("\ncould not save tests history to {}".format(self.file))
+            print(e)
 
     def register_test_run(self, test_name, outcome):
         if outcome == 'skipped':
