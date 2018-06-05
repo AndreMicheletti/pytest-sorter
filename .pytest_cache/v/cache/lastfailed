@@ -1,0 +1,3 @@
+{
+  "tests/test_sorter_with_xdist.py": true
+}

@@ -1,6 +1,7 @@
 import pytest
 from collections import defaultdict
 import json
+import os
 
 class TestSorter(object):
 
@@ -11,7 +12,10 @@ class TestSorter(object):
         if '.py' in passed_arg:
             index = passed_arg.rfind('/')
             passed_arg = passed_arg[:index]
-        self.file = "./" + passed_arg + '/.test_history'
+        if passed_arg.startswith('/'):
+            self.file = passed_arg + '/.test_history'
+        else:
+            self.file = "./" + passed_arg + '/.test_history'
         self.load_test_history()
 
     def get_test_name(self, item):
@@ -28,6 +32,7 @@ class TestSorter(object):
             outcome = callinfo.result.outcome
             self.register_test_run(test_name, outcome)
 
+    @pytest.mark.trylast
     def pytest_unconfigure(self, config):
         self.save_test_history()
 
@@ -89,3 +94,26 @@ class TestSorter(object):
             self.test_history[test_name] = [0, 0]
         self.test_history[test_name][0] += 1
         self.test_history[test_name][1] = (self.test_history[test_name][1] + 1) if failed else self.test_history[test_name][1]
+
+
+class TestSorterWithXDist(TestSorter):
+
+    @pytest.mark.trylast
+    def pytest_unconfigure(self, config):
+        if not config.option.numprocesses:
+            # IT's a worker node. contains its own info about the ran tests
+            workerid = config.workerinput['workerid']
+            with open('.results_' + workerid, 'w') as f:
+                json.dump(self.test_history, f)
+        else:
+            # IT's the main node. must save aggregated test infos from all workers
+            plugin = config.pluginmanager.getplugin("dsession")
+            final_test_history = {}
+            for spec in plugin.trdist._specs:
+                workerid = spec.id
+                with open('.results_' + workerid, 'r') as f:
+                    loaded = json.load(f)
+                final_test_history.update(loaded)
+                os.remove('.results_' + workerid)
+            self.test_history = final_test_history
+            self.save_test_history()
