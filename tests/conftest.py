@@ -3,6 +3,8 @@ from collections import defaultdict
 import json
 import os
 
+FILENAME = '.test_history'
+
 class TestSorter(object):
 
     def __init__(self, config):
@@ -13,10 +15,15 @@ class TestSorter(object):
             index = passed_arg.rfind('/')
             passed_arg = passed_arg[:index]
         if passed_arg.startswith('/'):
-            self.file = passed_arg + '/.test_history'
+            self.path = passed_arg + '/'
         else:
-            self.file = "./" + passed_arg + '/.test_history'
+            self.path = "./" + passed_arg
+        self.path = (self.path + '/') if self.path[-1] != '/' else self.path
         self.load_test_history()
+
+    @property
+    def file(self):
+        return self.path + FILENAME
 
     def get_test_name(self, item):
         from pytest import Module
@@ -100,10 +107,12 @@ class TestSorterWithXDist(TestSorter):
 
     @pytest.mark.trylast
     def pytest_unconfigure(self, config):
+        pytest_sorter = config.pluginmanager.getplugin("using-sorter")
+        path = pytest_sorter.path
         if not config.option.numprocesses:
             # IT's a worker node. contains its own info about the ran tests
             workerid = config.workerinput['workerid']
-            with open('.results_' + workerid, 'w') as f:
+            with open(path + '/.results_' + workerid, 'w') as f:
                 json.dump(self.test_history, f)
         else:
             # IT's the main node. must save aggregated test infos from all workers
@@ -111,9 +120,9 @@ class TestSorterWithXDist(TestSorter):
             final_test_history = {}
             for spec in plugin.trdist._specs:
                 workerid = spec.id
-                with open('.results_' + workerid, 'r') as f:
+                with open(path + '/.results_' + workerid, 'r') as f:
                     loaded = json.load(f)
                 final_test_history.update(loaded)
-                os.remove('.results_' + workerid)
+                os.remove(path + '/.results_' + workerid)
             self.test_history = final_test_history
             self.save_test_history()
