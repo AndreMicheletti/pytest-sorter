@@ -112,7 +112,7 @@ class TestSorterWithXDist(TestSorter):
         if not config.option.numprocesses:
             # IT's a worker node. contains its own info about the ran tests
             workerid = config.workerinput['workerid']
-            with open(path + '/.results_' + workerid, 'w') as f:
+            with open(path + '.results_' + workerid, 'w') as f:
                 json.dump(self.test_history, f)
         else:
             # IT's the main node. must save aggregated test infos from all workers
@@ -120,9 +120,9 @@ class TestSorterWithXDist(TestSorter):
             final_test_history = {}
             for spec in plugin.trdist._specs:
                 workerid = spec.id
-                with open(path + '/.results_' + workerid, 'r') as f:
+                with open(path + '.results_' + workerid, 'r') as f:
                     loaded = json.load(f)
                 final_test_history.update(loaded)
-                os.remove(path + '/.results_' + workerid)
+                os.remove(path + '.results_' + workerid)
             self.test_history = final_test_history
             self.save_test_history()

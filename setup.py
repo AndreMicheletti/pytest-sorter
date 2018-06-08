@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name='pytest-sorter',
-    version='0.1.7',
+    version='0.1.8',
     author='Andre Luiz Micheletti',
     author_email='andreluizmtmicheletti@gmail.com',
     maintainer='Andre Luiz Micheletti',
@@ -24,7 +24,7 @@ setup(
     ' execute tests that historically failed more',
     long_description=read('README.rst'),
     py_modules=['pytest_sorter'],
-    python_requires='>=3',
+    python_requires='>=3.3',
     install_requires=['pytest>=3.1.1'],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -33,6 +33,7 @@ setup(
         'Topic :: Software Development :: Testing',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
