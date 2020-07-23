@@ -3,7 +3,8 @@ import pytest
 
 pytest_plugins = ['pytester']
 
-@pytest.fixture
+
+@pytest.fixture(scope='function')
 def item_names_for(testdir):
 
     def _item_names_for(tests_content):
@@ -11,14 +12,14 @@ def item_names_for(testdir):
         items = testdir.getitems(tests_content)
         config = testdir.config
 
-        from conftest import TestSorter
+        from tests.pytest_sorter import TestSorter
         test_sorter = TestSorter(config)
-        # if config.pluginmanager.is_registered("sorter"):
-        #     config.pluginmanager.register(test_sorter, "sorter")
+        if config.pluginmanager.is_registered("src"):
+            config.pluginmanager.register(test_sorter, "src")
         hook = testdir.config.hook
         hook.pytest_collection_modifyitems(session=items[0].session,
                                            config=config, items=items)
-        return [item.name for item in items]
+        return tuple(item.name for item in items)
 
     return _item_names_for
 
@@ -29,7 +30,7 @@ def test_no_marks(item_names_for):
     def test_2(): pass
     """
 
-    assert item_names_for(tests_content) == ['test_1', 'test_2']
+    assert item_names_for(tests_content) == ('test_1', 'test_2')
 
 
 def test_marks(item_names_for):
@@ -45,7 +46,8 @@ def test_marks(item_names_for):
         pass
     """
 
-    assert item_names_for(tests_content) == ['test_2', 'test_1']
+    after_plugin = item_names_for(tests_content)
+    assert after_plugin == ('test_2', 'test_1')
 
 
 def test_marks_and_no_marks(item_names_for):
@@ -64,7 +66,7 @@ def test_marks_and_no_marks(item_names_for):
         pass
     """
 
-    assert item_names_for(tests_content) == ['test_2', 'test_1', 'test_3']
+    assert item_names_for(tests_content) == ('test_2', 'test_1', 'test_3')
 
 
 def test_relative_score(item_names_for):
@@ -84,7 +86,7 @@ def test_relative_score(item_names_for):
         pass
     """
 
-    assert item_names_for(tests_content) == ['test_2', 'test_1', 'test_3']
+    assert item_names_for(tests_content) == ('test_2', 'test_1', 'test_3')
 
 
 def test_marks_parametize(item_names_for):
@@ -103,4 +105,4 @@ def test_marks_parametize(item_names_for):
         assert eval(test_input) == expected
     """
 
-    assert item_names_for(tests_content) == ['test_eval[3-3]', 'test_eval[4-4]', 'test_eval[6-6]', 'test_1']
+    assert item_names_for(tests_content) == ('test_eval[3-3]', 'test_eval[4-4]', 'test_eval[6-6]', 'test_1')

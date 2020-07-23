@@ -1,7 +1,10 @@
-import pytest
-from collections import defaultdict
 import json
 import os
+from collections import defaultdict
+
+import pytest
+
+FILENAME = '../.test_history'
 
 
 def pytest_addoption(parser):
@@ -14,7 +17,7 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     config_line = (
         'historical: set the historical executions and fails count '
-        'for a specific test. Provided by pytest-sorter. '
+        'for a specific test. Provided by pytest-src. '
     )
     config.addinivalue_line('markers', config_line)
 
@@ -22,14 +25,11 @@ def pytest_configure(config):
         if config.pluginmanager.hasplugin('xdist'):
             if hasattr(config, 'workerinput'):
                 worker_id = config.workerinput['workerid']
-                config.pluginmanager.register(TestSorterWorker(config, worker_id), "using-sorter-worker")
+                config.pluginmanager.register(TestSorterWorker(config, worker_id), "using-src-worker")
             else:
-                config.pluginmanager.register(TestSorterXDist(config), "using-sorter")
+                config.pluginmanager.register(TestSorterXDist(config), "using-src")
         else:
-            config.pluginmanager.register(TestSorter(config), "using-sorter")
-
-
-FILENAME = '.test_history'
+            config.pluginmanager.register(TestSorter(config), "using-src")
 
 
 class TestSorter(object):
@@ -62,17 +62,21 @@ class TestSorter(object):
             test_name = self.get_test_name(item)
 
             # GET EXECUTION AND FAIL COUNT FROM MARKS
-            mark = item.get_marker('historical')
+            mark = self.get_historical_marker_from_item(item)
             plus_exec = 0
             plus_fail = 0
-            if mark:
+            if mark is not None:
                 plus_exec = abs(mark.kwargs.get('execs', 0))
                 plus_fail = abs(mark.kwargs.get('fails', 0))
 
             # CALCULATE TEST VALUE USING HISTORIC AND MARK VALUES
             items_value.append({
                 'item': item,
-                'value': self.get_test_order_value(test_name, plus_exec=plus_exec, plus_fail=plus_fail)
+                'value': self.get_test_order_value(
+                    test_name,
+                    plus_exec=plus_exec,
+                    plus_fail=plus_fail
+                )
             })
 
         # SORT ITEMS BY THEIR VALUE
@@ -82,6 +86,13 @@ class TestSorter(object):
     @property
     def file(self):
         return self.path + FILENAME
+
+    def get_historical_marker_from_item(self, item):
+        """ Extract the pytest-src 'historial' marker from a item """
+        for mark in item.own_markers:
+            if mark.name == 'historical':
+                return mark
+        return None
 
     def get_test_order_value(self, test_name, plus_exec=0, plus_fail=0):
         if test_name not in self.test_history.keys():
@@ -142,7 +153,7 @@ class TestSorterXDist(TestSorter):
 
     @pytest.mark.trylast
     def pytest_unconfigure(self, config):
-        pytest_sorter = config.pluginmanager.getplugin("using-sorter")
+        pytest_sorter = config.pluginmanager.getplugin("using-src")
         path = pytest_sorter.path
         # IT's the main node. must save aggregated test infos from all workers
         plugin = config.pluginmanager.getplugin("dsession")
