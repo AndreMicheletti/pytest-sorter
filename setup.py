@@ -3,7 +3,7 @@
 
 import os
 import codecs
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname):
@@ -13,19 +13,25 @@ def read(fname):
 
 setup(
     name='pytest-sorter',
-    version='0.2.1',
+    version='0.2.2',
     author='Andre Luiz Micheletti',
     author_email='andreluizmtmicheletti@gmail.com',
     maintainer='Andre Luiz Micheletti',
     maintainer_email='andreluizmtmicheletti@gmail.com',
     license='MIT',
     url='https://github.com/AndreMicheletti/pytest-sorter',
-    description='A simple plugin to first' +
-    ' execute tests that historically failed more',
+    description='A simple plugin to first execute tests that historically failed more',
     long_description=read('README.rst'),
     long_description_content_type="text/markdown",
-    py_modules=['pytest_sorter'],
     python_requires='>=3.6',
+    packages=find_packages(),
+    # py_modules=['pytest_sorter'],
+    entry_points={
+        'pytest11': ['pytest_sorter = src.pytest_sorter'],
+    },
+    zip_safe=False,
+    include_package_data=True,
+    platforms='any',
     install_requires=['pytest>=3.1.1'],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -41,9 +47,4 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
     ],
-    entry_points={
-        'pytest11': [
-            'sorter = pytest_sorter',
-        ],
-    },
 )

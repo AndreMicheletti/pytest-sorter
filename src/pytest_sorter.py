@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 from collections import defaultdict
 
 import pytest
+
+__version__ = '0.2.1'
+
 
 FILENAME = '.test_history'
 
