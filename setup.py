@@ -23,8 +23,9 @@ setup(
     description='A simple plugin to first' +
     ' execute tests that historically failed more',
     long_description=read('README.rst'),
-    package_dir={'': 'tests'},
-    packages=[''],
+    long_description_content_type="text/markdown",
+    package_dir={'src': 'tests'},
+    packages=['src'],
     python_requires='>=3.6',
     install_requires=['pytest>=3.1.1'],
     classifiers=[
