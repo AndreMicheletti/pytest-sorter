@@ -12,10 +12,11 @@ def item_names_for(testdir):
         items = testdir.getitems(tests_content)
         config = testdir.config
 
-        from tests.pytest_sorter import TestSorter
-        test_sorter = TestSorter(config)
         if config.pluginmanager.is_registered("src"):
+            from .conftest import TestSorter
+            test_sorter = TestSorter(config)
             config.pluginmanager.register(test_sorter, "src")
+
         hook = testdir.config.hook
         hook.pytest_collection_modifyitems(session=items[0].session,
                                            config=config, items=items)

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import pytest
 
-FILENAME = '../.test_history'
+FILENAME = '.test_history'
 
 
 def pytest_addoption(parser):
