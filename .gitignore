@@ -80,3 +80,4 @@ target/
 
 # pyenv
 .python-version
+.tox
