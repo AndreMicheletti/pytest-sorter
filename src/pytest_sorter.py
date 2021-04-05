@@ -50,7 +50,7 @@ class TestSorter(object):
         callinfo = yield
         if call.when == 'call':
             test_name = self.get_test_name(item)
-            outcome = callinfo.result.outcome
+            outcome = callinfo.get_result().outcome
             self.register_test_run(test_name, outcome)
 
     @pytest.mark.trylast
@@ -161,12 +161,13 @@ class TestSorterXDist(TestSorter):
         path = pytest_sorter.path
         # IT's the main node. must save aggregated test infos from all workers
         plugin = config.pluginmanager.getplugin("dsession")
-        for spec in plugin.trdist._specs:
-            workerid = spec.id
-            with open(path + '.results_' + workerid, 'r') as f:
-                loaded = json.load(f)
-            for test_name, data in loaded.items():
-                outcome = 'failed' if data[1] > 0 else 'passed'
-                self.register_test_run(test_name, outcome)
-            os.remove(path + '.results_' + workerid)
-        self.save_test_history()
+        if plugin:
+            for spec in plugin.trdist._specs:
+                workerid = spec.id
+                with open(path + '.results_' + workerid, 'r') as f:
+                    loaded = json.load(f)
+                for test_name, data in loaded.items():
+                    outcome = 'failed' if data[1] > 0 else 'passed'
+                    self.register_test_run(test_name, outcome)
+                os.remove(path + '.results_' + workerid)
+            self.save_test_history()
