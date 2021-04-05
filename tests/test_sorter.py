@@ -10,14 +10,14 @@ def item_names_for(testdir):
     def _item_names_for(tests_content):
         # some strange code to extract sorted items
         items = testdir.getitems(tests_content)
-        config = testdir.config
+        config = testdir.request.config
 
         if config.pluginmanager.is_registered("src"):
             from .conftest import TestSorter
             test_sorter = TestSorter(config)
             config.pluginmanager.register(test_sorter, "src")
 
-        hook = testdir.config.hook
+        hook = config.hook
         hook.pytest_collection_modifyitems(session=items[0].session,
                                            config=config, items=items)
         return tuple(item.name for item in items)

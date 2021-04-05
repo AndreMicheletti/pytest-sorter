@@ -16,7 +16,7 @@ This `pytest`_ plugin was generated with `cookiecutter`_ along with `@hackebrot`
 
 
 Description
---------
+-----------
 
 This plugin will save a history of your tests executions in a file `.test_history`. For each test it will
 have how many times it was executed, and how many times it failed.
