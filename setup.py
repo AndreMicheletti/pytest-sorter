@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name='pytest-sorter',
-    version='0.3.0',
+    version='0.3.1',
     author='Andre Luiz Micheletti',
     author_email='andreluizmtmicheletti@gmail.com',
     maintainer='Andre Luiz Micheletti',
