@@ -40,10 +40,14 @@ class TestSorter(object):
 
     def __init__(self, config):
         self.config = config
-        self.test_history = defaultdict(str)
+        self.test_history = defaultdict(lambda: [0, 0])
+        self.test_history_changeset = defaultdict(lambda: [0, 0])
         self.path = config.rootdir.strpath
         self.path = (self.path + '/') if self.path[-1] != '/' else self.path
         self.load_test_history()
+
+    # PYTEST HOOKS
+    ###################################################
 
     @pytest.hookimpl(hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
@@ -55,7 +59,7 @@ class TestSorter(object):
 
     @pytest.mark.trylast
     def pytest_unconfigure(self, config):
-        self.save_test_history()
+        self.unconfigure_sorter()
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
@@ -87,9 +91,17 @@ class TestSorter(object):
         sorted_items = [test_dict['item'] for test_dict in sorted(items_value, reverse=True, key=lambda x: x['value'])]
         items[:] = sorted_items
 
+    # PLUGIN FUNCTIONS
+    ###################################################
+
     @property
     def file(self):
         return self.path + FILENAME
+
+    def unconfigure_sorter(self):
+        """ Main function to aggregate all unconfigure logic """
+        self.apply_history_changeset()
+        self.save_test_history()
 
     def get_historical_marker_from_item(self, item):
         """ Extract the pytest-src 'historial' marker from a item """
@@ -98,7 +110,8 @@ class TestSorter(object):
                 return mark
         return None
 
-    def get_test_order_value(self, test_name, plus_exec=0, plus_fail=0):
+    def get_test_order_value(self, test_name, plus_exec=0, plus_fail=0) -> float:
+        """ Returns the failure ratio used to compare between tests """
         if test_name not in self.test_history.keys():
             exec_count, fail_count = 0, 0
         else:
@@ -108,6 +121,7 @@ class TestSorter(object):
         return (fail_count + plus_fail) / (exec_count + plus_exec)
 
     def load_test_history(self):
+        """ Load history from file as JSON """
         try:
             with open(self.file, 'r') as f:
                 self.test_history = json.load(f)
@@ -115,6 +129,7 @@ class TestSorter(object):
             self.save_test_history()
 
     def save_test_history(self):
+        """  Save history to file as JSON """
         try:
             with open(self.file, 'w') as f:
                 json.dump(self.test_history, f)
@@ -122,16 +137,25 @@ class TestSorter(object):
             print("\ncould not save tests history to {}".format(self.file))
             print(e)
 
+    def apply_history_changeset(self):
+        """ Apply the changeset of current run session to the loaded history values """
+        for test_name, test_values in self.test_history_changeset.items():
+            sum_runs, sum_fails = test_values
+            prev_runs, prev_fails = self.test_history[test_name]
+            self.test_history[test_name] = [
+                max(prev_runs + sum_runs, 0),
+                max(prev_fails + sum_fails, 0)
+            ]
+
     def register_test_run(self, test_name, outcome):
+        """ Callback to register a test outcome to history data """
         if outcome == 'skipped':
             return
-        failed = outcome == 'failed'
-        if test_name not in self.test_history.keys():
-            self.test_history[test_name] = [0, 0]
-        self.test_history[test_name][0] += 1
-        self.test_history[test_name][1] = (self.test_history[test_name][1] + 1) if failed else self.test_history[test_name][1]
+        failed = 1 if outcome == 'failed' else 0
+        self.test_history_changeset[test_name] = [1, failed]
 
     def get_test_name(self, item):
+        """ Helper to parse and standardize test names """
         from pytest import Module
         if isinstance(item, Module):
             return item.nodeid
@@ -170,4 +194,4 @@ class TestSorterXDist(TestSorter):
                     outcome = 'failed' if data[1] > 0 else 'passed'
                     self.register_test_run(test_name, outcome)
                 os.remove(path + '.results_' + workerid)
-            self.save_test_history()
+            self.unconfigure_sorter()
