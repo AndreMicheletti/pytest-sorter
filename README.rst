@@ -5,8 +5,8 @@ pytest-sorter
 .. image:: http://img.shields.io/pypi/v/pytest-sorter.svg
     :target: https://pypi.python.org/pypi/pytest-sorter
 
-.. image:: https://travis-ci.org/AndreMicheletti/pytest-sorter.svg?branch=master
-    :target: https://travis-ci.org/AndreMicheletti/pytest-sorter
+.. image:: https://travis-ci.com/AndreMicheletti/pytest-sorter.svg?branch=master
+    :target: https://travis-ci.com/AndreMicheletti/pytest-sorter
     :alt: See Build Status on Travis CI
 
 
